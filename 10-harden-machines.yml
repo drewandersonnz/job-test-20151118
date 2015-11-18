@@ -1,0 +1,14 @@
+# demo_setup.yml
+
+- hosts: docker_servers
+  remote_user: ubuntu
+  become: yes
+
+  # vars:
+
+  tasks:
+
+  # fail2ban helps secure against brute-force attacks
+  - name: Install fail2ban
+    apt: name=fail2ban state=latest
+

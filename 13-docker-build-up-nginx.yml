@@ -1,0 +1,39 @@
+# demo_setup.yml
+
+- hosts: docker_servers
+  remote_user: ubuntu
+  become: yes
+
+  vars:
+    docker_nginx_app: ansible/nginx-app
+    docker_nginx_app_source: ./support/nginx/
+    docker_nginx_app_destination: /src/support/nginx/.
+
+  tasks:
+
+### Nginx configuration
+  - name: Copy docker.io nginx container project
+    copy:
+        src="{{ docker_nginx_app_source }}"
+        dest="{{ docker_nginx_app_destination }}"
+        owner=ubuntu
+        group=ubuntu
+
+### Cheat for container discovery
+  - name: Cheat getting node.js internal container IP
+    shell: chmod +x ./generate-nginx-host.bash && ./generate-nginx-host.bash
+    args:
+        chdir: "{{ docker_nginx_app_destination }}"
+
+### Build Nginx container
+  - name: Build docker.io nginx container project (ansible core docker_image)
+    docker_image: path="{{ docker_nginx_app_destination }}" name="{{ docker_nginx_app }}" state=build
+
+### Launch nginx container with port passthrough
+  - name: Start docker.io nginx project container (using ansible docker core)
+    docker:
+        name: nginx
+        image: "{{ docker_nginx_app }}"
+        state: started
+        ports:
+          - 80:80

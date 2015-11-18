@@ -1,0 +1,92 @@
+# Setup AWS VPC, Security Group, Key Pair, Launch Ubuntu 14.04 64bit HVM t2.micro instance
+
+- hosts: localhost
+  connection: local
+  gather_facts: False
+
+  vars:
+    aws_base_ami: ami-69631053
+    aws_region: ap-southeast-2
+
+  tasks:
+
+  - name: ec2 vpc configuration
+    ec2_vpc:
+        state: present
+        region: "{{ aws_region }}"
+        cidr_block: 192.168.0.0/16
+        internet_gateway: yes
+        resource_tags: { "Environment":"ansible" }
+        subnets:
+          - cidr: 192.168.1.0/24
+            az: ap-southeast-2a
+        route_tables:
+          - subnets:
+              - 192.168.1.0/24
+            routes:
+              - dest: 0.0.0.0/0
+                gw: igw
+    register: ec2_vpc
+
+  - name: Ensure present - ansible_web_accessable ec2 security group
+    ec2_group:
+        name: ansible_web_accessable
+        description: ansible EC2 group
+
+        region: "{{ aws_region }}"
+
+        # use above vpc
+        vpc_id: "{{ ec2_vpc.vpc.id }}"
+
+        rules:
+          # http from anywhere
+          - proto: tcp
+            from_port: 80
+            to_port: 80
+            cidr_ip: 0.0.0.0/0
+
+          # ssh from anywhere for simplicity, protected by fail2ban
+          - proto: tcp
+            from_port: 22
+            to_port: 22
+            cidr_ip: 0.0.0.0/0
+
+        rules_egress:
+          - proto: all
+            type: all
+            cidr_ip: 0.0.0.0/0
+    register: ec2_group
+
+  - name: Ensure present - ansible_keypair ec2 key
+    ec2_key:
+        name: ansible_keypair
+        region: "{{ aws_region }}"
+    register: ec2_key
+
+  - name: If changed - save private key
+    copy: content="{{ ec2_key.key.private_key }}" dest="./tmp/aws-private.pem" mode=0600
+    when: ec2_key.changed
+
+  - name: Launch an instance
+    ec2:
+        region: "{{ aws_region }}"
+        # vpc_id: "{{ aws_vpc_id }}"
+        vpc_subnet_id: "{{ ec2_vpc.subnets[0].id }}"
+        image: "{{ aws_base_ami }}"
+        instance_type: t2.micro
+
+        # aws key pair name
+        key_name: ansible_keypair
+
+        # security group
+        group: ansible_web_accessable
+
+        wait: true
+        count: 1
+        assign_public_ip: yes
+    register: ec2
+
+  - name: Save IP to latest inventory file (sudo cp ./tmp/hosts /etc/ansible/hosts && sudo nano /etc/ansible/hosts)
+    copy: content="[docker_servers]{{'\n'}}{{ item.public_ip }} ansible_user=ubuntu ansible_ssh_private_key_file=/path/to/tmp/aws-private.pem{{'\n'}}" dest=./tmp/hosts
+    with_items: ec2.instances
+

@@ -1,0 +1,29 @@
+# Deploy and build code
+
+- hosts: docker_servers
+  remote_user: ubuntu
+  become: yes
+
+  vars:
+    docker_node_app: ansible/node-app
+    docker_node_app_source: ./support/node.js/
+    docker_node_app_destination: /src/support/node.js/.
+
+  tasks:
+
+### Node.js example app
+  - name: Copy docker.io node.js container project
+    copy:
+        src="{{ docker_node_app_source }}"
+        dest="{{ docker_node_app_destination }}"
+        owner=ubuntu
+        group=ubuntu
+
+  - name: Build docker.io node.js container project (ansible core docker_image)
+    docker_image: path="{{ docker_node_app_destination }}" name="{{ docker_node_app }}" state=build
+
+  - name: Start docker.io node project container (using ansible docker core)
+    docker:
+        name: node
+        image: "{{ docker_node_app }}"
+        state: started

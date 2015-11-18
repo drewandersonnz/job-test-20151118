@@ -1,0 +1,23 @@
+# Setup docker for management from ansible
+
+- hosts: docker_servers
+  remote_user: ubuntu
+  become: yes
+
+  vars:
+    docker_app: ansible/node-app
+    docker_app_path: /src/support/
+
+  tasks:
+
+  - name: Install docker.io (update apt cache)
+    apt: name=docker.io state=latest update_cache=yes cache_valid_time=3600
+
+  - name: Uninstall docker-python if ever present
+    apt: name=docker-python state=absent
+
+  - name: Install python-pip
+    apt: name=python-pip state=latest
+
+  - name: Install docker-py as a workaround for Ansible issue
+    pip: name=docker-py version=1.2.3
