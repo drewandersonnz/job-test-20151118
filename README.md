@@ -46,6 +46,6 @@ At this point you can browse to http://target-ip/ found in your /etc/ansible/hos
  * running on an Ubuntu EC2 instance
  * all provisioned by Ansible
 
-== Tip:
+## Tip:
 
 You can get the address for target-ip from the "PLAY RECAP" at the end of the last playbook.
