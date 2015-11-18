@@ -9,6 +9,7 @@
 Configure config.local and set AWS credentials
 
     cp config.local.sample config.local && nano config.local
+    source config.local
 
 Setup local environment (install ansible)
 
@@ -44,3 +45,7 @@ At this point you can browse to http://target-ip/ found in your /etc/ansible/hos
    * using internal Docker networking for communication between and simple service discovery to ensure IP isn't hard-coded
  * running on an Ubuntu EC2 instance
  * all provisioned by Ansible
+
+== Tip:
+
+You can get the address for target-ip from the "PLAY RECAP" at the end of the last playbook.
