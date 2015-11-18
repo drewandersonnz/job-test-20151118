@@ -49,3 +49,10 @@ At this point you can browse to http://target-ip/ found in your /etc/ansible/hos
 ## Tip:
 
 You can get the address for target-ip from the "PLAY RECAP" at the end of the last playbook.
+
+## Cleaning:
+
+ * Log into AWS console
+ * Terminate all instances within VPC
+ * Delete VPC and all associated resources
+ * Delete keypair (this will trip up any rebuilds as keypair cannot be saved twice)
