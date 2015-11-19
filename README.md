@@ -2,7 +2,17 @@
 
 ## Task:
 
-    Using the following AWS credentials please provision a simple Node web application in a Docker container served by Nginx running on an EC2 instance provisioned by Ansible.
+    Using the following AWS credentials please provision a simple
+    Node web application in a Docker container served by Nginx running
+    on an EC2 instance provisioned by Ansible.
+
+    The content served by the Node application can be anything.
+    The container is to be hosted on a free Docker registry
+    (ie. hub.docker.io or quay.io) and there are no restrictions on
+    the number of git repositories that can be used.
+
+    Please provide URLs, ELB or IP address where to access said
+    application and URLs to all code.
 
 ## Process:
 
@@ -56,3 +66,27 @@ You can get the address for target-ip from the "PLAY RECAP" at the end of the la
  * Terminate all instances within VPC
  * Delete VPC and all associated resources
  * Delete keypair (this will trip up any rebuilds as keypair cannot be saved twice)
+
+## Questions and Enhancements?
+
+ * Should I be deploying random images to the Docker Hub?
+   * Avoided as I am only extending from the images provided
+ * How do I maintain a Dynamic Inventory in Ansible?
+   * Currently cheating with generating hosts file
+ * Docker networking failures?
+   * worked on 14.04, not on 15.10
+ * Using variables on Playbooks (and on command line)
+   * one playbook for targeting a single instance out of multiple
+ * Calling Playbooks from a master Playbook
+   * chaining changes
+ * Service discovery for greater configuration of NGINX
+   * Centralised across multiple hosts?
+   * Or one (or more) NGINX per host accssing the internal containers using local configuration only?
+   * How much cheating is not cheating? Using bash scripts to fake service discovery ...
+ * NGINX configuration without rebuilding container
+   * Live configuration injection? NGINX restart / reload?
+   * If require rebuilding, could do "rolling restart" across multiple NGINX instances, Ansible can handle this for us
+ * Attach AWS ELB to multiple NGINX instances
+   * Do we need more than one NGINX per host machine?
+ * How does Docker.io compare to LXC?
+ * How does Docker.io / LXC access hardware resources (GPIO / I2C) for a Raspberry Pi deployment?
