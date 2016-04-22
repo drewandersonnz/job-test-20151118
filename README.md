@@ -1,5 +1,7 @@
 # job-test-20151118
 
+Note: This is my first attempt at Ansible, I was learning it as I went. It is very different to Puppet but I loved it and decided to change my Puppet installation to Ansible. This is kept here for historical reasons.
+
 ## Task:
 
     Using the following AWS credentials please provision a simple
